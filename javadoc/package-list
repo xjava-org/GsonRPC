@@ -1,0 +1,6 @@
+
+org.xjava.gsonrpc
+org.xjava.gsonrpc.annotation
+org.xjava.gsonrpc.exception
+org.xjava.gsonrpc.gson
+org.xjava.gsonrpc.message
