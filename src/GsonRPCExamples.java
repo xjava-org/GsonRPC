@@ -39,14 +39,14 @@ public class GsonRPCExamples {
 
     String responsesJsonString = gsonRPC.toJson(responses);
 
-    System.out.println("Responses:");
+    System.out.println("\nResponses:");
     System.out.println(responsesJsonString);
 
     //Get results as objects
     Integer firstResult = gsonRPC.getResult(responses.get(0).getAsResponse(), Integer.class);
     String secondResult = gsonRPC.getResult(responses.get(1).getAsResponse(), String.class);
 
-    System.out.println("Results");
+    System.out.println("\nResults:");
     System.out.println(firstResult);
     System.out.println(secondResult);
   }
