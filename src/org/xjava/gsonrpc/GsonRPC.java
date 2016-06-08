@@ -46,6 +46,7 @@ public class GsonRPC {
   private final Gson gson;
   private final JsonParser parser = new JsonParser();
   private final JsonRPCMessageFactory messageFactory;
+  private final JsonRPCProxyFactory proxyFactory;
   private final JsonRPCRequestHandler requestHandler;
 
   /**
@@ -83,6 +84,7 @@ public class GsonRPC {
         .create();
 
     messageFactory = new JsonRPCMessageFactory(gson);
+    proxyFactory = new JsonRPCProxyFactory(this);
     requestHandler = new JsonRPCRequestHandler(gson, messageFactory);
   }
 
@@ -155,7 +157,7 @@ public class GsonRPC {
    */
   @Nullable
   public <T> T getResult(JsonRPCResponse response, Class<T> resultClass) {
-    return gson.fromJson(response.getResultJson(), resultClass);
+    return response.getResult(gson, resultClass);
   }
 
   /**
@@ -167,7 +169,7 @@ public class GsonRPC {
    */
   @Nullable
   public <T> T getData(JsonRPCErrorResponse errorResponse, Class<T> dataClass) {
-    return gson.fromJson(errorResponse.getDataJson(), dataClass);
+    return errorResponse.getData(gson, dataClass);
   }
 
   /**
@@ -178,6 +180,16 @@ public class GsonRPC {
   @NotNull
   public JsonRPCMessageFactory getMessageFactory() {
     return messageFactory;
+  }
+
+  /**
+   * Gets the JsonRPCProxyFactory.
+   *
+   * @return The JsonRPCProxyFactory
+   */
+  @NotNull
+  public JsonRPCProxyFactory getProxyFactory() {
+    return proxyFactory;
   }
 
   /**

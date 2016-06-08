@@ -22,38 +22,34 @@
  * SOFTWARE.
  */
 
-package org.xjava.gsonrpc.message;
+package org.xjava.gsonrpc;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
+import org.xjava.gsonrpc.proxy.JsonRPCResponseGetter;
+import org.xjava.gsonrpc.proxy.JsonRPCServiceProxy;
+
+import java.lang.reflect.Proxy;
 
 /**
  * @version 1.0
  * @author Adam Lowman
  */
-public class JsonRPCResponse extends JsonRPCMessage {
-  private final JsonElement resultJson;
+public class JsonRPCProxyFactory {
 
-  public JsonRPCResponse(@NotNull String version, @Nullable String id, @Nullable JsonElement resultJson) {
-    super(version, id);
-    this.resultJson = resultJson;
+  private GsonRPC gsonRPC;
+
+  public JsonRPCProxyFactory(@NotNull GsonRPC gsonRPC) {
+    this.gsonRPC = gsonRPC;
   }
 
-  public JsonElement getResultJson() {
-    return resultJson;
+  public <T> T newServiceProxy(@NotNull Class<T> serviceInterface, @NotNull JsonRPCResponseGetter responseGetter) {
+    return newServiceProxy(serviceInterface, null, responseGetter);
   }
 
-  /**
-   * Gets the result as an Object.
-   *
-   * @param gson The instance of gson used for parsing JSON
-   * @param resultClass The Class of the result
-   * @return The result
-   */
-  @Nullable
-  public <T> T getResult(Gson gson, Class<T> resultClass) {
-    return gson.fromJson(getResultJson(), resultClass);
+  public <T> T newServiceProxy(@NotNull Class<T> serviceInterface, @Nullable String namespace, @NotNull JsonRPCResponseGetter responseGetter) {
+    JsonRPCServiceProxy serviceProxy = new JsonRPCServiceProxy(gsonRPC, serviceInterface, namespace, responseGetter);
+    return (T) Proxy.newProxyInstance(serviceInterface.getClassLoader(), new Class[] { serviceInterface }, serviceProxy);
   }
 }

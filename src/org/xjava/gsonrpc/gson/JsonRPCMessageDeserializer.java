@@ -55,7 +55,11 @@ public class JsonRPCMessageDeserializer implements JsonDeserializer<JsonRPCMessa
         return new JsonRPCResponse(version, id, resultJson);
       }
       else if (json.has("error")) {
-        return new JsonRPCErrorResponse(version, id, JsonRPCError.INTERNAL_ERROR);
+        JsonObject error = json.get("error").getAsJsonObject();
+        int code = error.get("code").getAsInt();
+        String message = error.get("message").getAsString();
+        JsonElement dataJson = error.get("data");
+        return new JsonRPCErrorResponse(version, id, new JsonRPCError(code, message), dataJson);
       }
     }
     catch (Exception e) {

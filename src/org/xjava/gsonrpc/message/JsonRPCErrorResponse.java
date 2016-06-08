@@ -24,6 +24,7 @@
 
 package org.xjava.gsonrpc.message;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
@@ -53,5 +54,17 @@ public class JsonRPCErrorResponse extends JsonRPCMessage {
 
   public JsonElement getDataJson() {
     return dataJson;
+  }
+
+  /**
+   * Gets the data as an Object.
+   *
+   * @param gson The instance of gson used for parsing JSON
+   * @param dataClass The Class of the data
+   * @return The data
+   */
+  @Nullable
+  public <T> T getData(Gson gson, Class<T> dataClass) {
+    return gson.fromJson(getDataJson(), dataClass);
   }
 }

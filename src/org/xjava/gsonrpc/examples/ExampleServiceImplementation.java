@@ -22,38 +22,19 @@
  * SOFTWARE.
  */
 
-package org.xjava.gsonrpc.message;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+package org.xjava.gsonrpc.examples;
 
 /**
- * @version 1.0
- * @author Adam Lowman
+ * An example service implementation.
  */
-public class JsonRPCResponse extends JsonRPCMessage {
-  private final JsonElement resultJson;
 
-  public JsonRPCResponse(@NotNull String version, @Nullable String id, @Nullable JsonElement resultJson) {
-    super(version, id);
-    this.resultJson = resultJson;
+public class ExampleServiceImplementation implements ExampleServiceInterface {
+
+  public Integer getMeaningOfLife() {
+    return 42;
   }
 
-  public JsonElement getResultJson() {
-    return resultJson;
-  }
-
-  /**
-   * Gets the result as an Object.
-   *
-   * @param gson The instance of gson used for parsing JSON
-   * @param resultClass The Class of the result
-   * @return The result
-   */
-  @Nullable
-  public <T> T getResult(Gson gson, Class<T> resultClass) {
-    return gson.fromJson(getResultJson(), resultClass);
+  public String makeLouder(String message) {
+    return message.toUpperCase();
   }
 }

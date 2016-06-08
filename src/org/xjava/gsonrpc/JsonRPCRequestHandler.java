@@ -57,39 +57,36 @@ public class JsonRPCRequestHandler {
     rpcMethods = new HashMap<>();
   }
 
-  public void addService(Class serviceClass) {
-    addService(serviceClass, null);
+  public void addService(@NotNull Object serviceInstance, @NotNull Class serviceInterface) {
+    addService(serviceInstance, serviceInterface, null);
   }
 
-  public void addService(@NotNull Class serviceClass, @Nullable String namespace) {
-    RPCService serviceAnnotation = (RPCService) serviceClass.getAnnotation(RPCService.class);
+  public void addService(@NotNull Object serviceInstance, @NotNull Class serviceInterface, @Nullable String namespace) {
+    RPCService serviceAnnotation = (RPCService) serviceInterface.getAnnotation(RPCService.class);
 
     if(namespace == null) {
       if (serviceAnnotation != null && !serviceAnnotation.namespace().isEmpty())
         namespace = serviceAnnotation.namespace();
       else
-        namespace = serviceClass.getSimpleName();
+        namespace = serviceInstance.getClass().getSimpleName();
     }
 
-    Method[] methods = serviceClass.getMethods();
+    Method[] methods = serviceInterface.getMethods();
     for(Method method: methods) {
       if(method.isAnnotationPresent(RPCMethod.class))
-        addMethod(method, namespace);
+        addMethod(serviceInstance, method, namespace);
     }
   }
 
-  public void addMethod(Method method) throws JsonRPCRuntimeException {
-    addMethod(method, "", null);
+  public void addMethod(@NotNull Object methodHandler, @NotNull Method method) throws JsonRPCRuntimeException {
+    addMethod(methodHandler, method, "", null);
   }
 
-  public void addMethod(Method method, String namespace) throws JsonRPCRuntimeException {
-    addMethod(method, namespace, null);
+  public void addMethod(@NotNull Object methodHandler, @NotNull Method method, @Nullable String namespace) throws JsonRPCRuntimeException {
+    addMethod(methodHandler, method, namespace, null);
   }
 
-  public void addMethod(@NotNull Method method, @NotNull String namespace, @Nullable String methodName) throws JsonRPCRuntimeException {
-    if(!Modifier.isStatic(method.getModifiers()))
-      throw new JsonRPCRuntimeException(method.getName() + " in " + method.getDeclaringClass().getCanonicalName() + " is non-static.");
-
+  public void addMethod(@NotNull Object methodHandler, @NotNull Method method, @NotNull String namespace, @Nullable String methodName) throws JsonRPCRuntimeException {
     if("rpc".equalsIgnoreCase(namespace))
       throw new JsonRPCRuntimeException("The \"rpc\" namespace is reserved.");
 
@@ -115,7 +112,7 @@ public class JsonRPCRequestHandler {
       paramNames = new ArrayList<>(Arrays.asList(methodAnnotation.paramNames()));
     }
 
-    rpcMethods.put(rpcMethodName, new RPCMethodData(method, rpcMethodName, paramNames));
+    rpcMethods.put(rpcMethodName, new RPCMethodData(methodHandler, method, rpcMethodName, paramNames));
   }
 
   @NotNull
@@ -139,7 +136,7 @@ public class JsonRPCRequestHandler {
       return messageFactory.newErrorResponse(request.getId(), JsonRPCError.INVALID_PARAMS);
 
     try {
-      Object result = rpcMethodData.getMethod().invoke(null, params.toArray());
+      Object result = rpcMethodData.getMethod().invoke(rpcMethodData.getMethodHandler(), params.toArray());
       return messageFactory.newResponse(request.getId(), gson.toJsonTree(result));
     }
     catch(Exception e) {
@@ -199,14 +196,21 @@ public class JsonRPCRequestHandler {
   }
 
   private final class RPCMethodData {
+    private final Object methodHandler;
     private final Method method;
     private final String methodName;
     private final ArrayList<String> paramNames;
 
-    public RPCMethodData(@NotNull Method method, @NotNull String methodName, @Nullable ArrayList<String> paramNames) {
+    public RPCMethodData(@NotNull Object methodHandler, @NotNull Method method, @NotNull String methodName, @Nullable ArrayList<String> paramNames) {
+      this.methodHandler = methodHandler;
       this.method = method;
       this.methodName = methodName;
       this.paramNames = paramNames;
+    }
+
+    @NotNull
+    public Object getMethodHandler() {
+      return methodHandler;
     }
 
     @NotNull

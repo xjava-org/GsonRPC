@@ -22,38 +22,14 @@
  * SOFTWARE.
  */
 
-package org.xjava.gsonrpc.message;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
+package org.xjava.gsonrpc.proxy;
 
 /**
  * @version 1.0
  * @author Adam Lowman
  */
-public class JsonRPCResponse extends JsonRPCMessage {
-  private final JsonElement resultJson;
 
-  public JsonRPCResponse(@NotNull String version, @Nullable String id, @Nullable JsonElement resultJson) {
-    super(version, id);
-    this.resultJson = resultJson;
-  }
-
-  public JsonElement getResultJson() {
-    return resultJson;
-  }
-
-  /**
-   * Gets the result as an Object.
-   *
-   * @param gson The instance of gson used for parsing JSON
-   * @param resultClass The Class of the result
-   * @return The result
-   */
-  @Nullable
-  public <T> T getResult(Gson gson, Class<T> resultClass) {
-    return gson.fromJson(getResultJson(), resultClass);
-  }
+@FunctionalInterface
+public interface JsonRPCResponseGetter {
+  public String getResponse(String requestJson);
 }
