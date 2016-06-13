@@ -31,5 +31,5 @@ package org.xjava.gsonrpc.proxy;
 
 @FunctionalInterface
 public interface JsonRPCResponseGetter {
-  public String getResponse(String requestJson);
+  public String getResponse(String requestJson) throws Throwable;
 }
